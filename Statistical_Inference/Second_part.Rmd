@@ -1,0 +1,97 @@
+---
+title: "ToothGroowth Analysis"
+author: "LP"
+date: "Sunday, June 21, 2015"
+output: pdf_document
+---
+
+This is the second part of the project for the Statistical Inference course, of the Data Science Specialization offered by the Johns Hopkins University.
+
+
+##Overview
+
+For this part we are going to analyze the ToothGrowth data in the R datasets package.
+
+The ToothGrowth dataset documents the effect of vitamin C on tooth growth in guinea pigs. The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+Further Information on the ToothGrowth dataset can be found here: https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
+
+
+##Load the ToothGrowth data and perform some basic exploratory data analyses
+
+First, we have to load the libraries we need and the ToothGrowth dataset.
+Then, we can view part of the dataset (a dataframe with 60 observations on 3 variables) and by using boxplots we can perform a basic exploratory data analyses.
+
+```{r}
+#Load needed libraries
+library(ggplot2)
+library(datasets)
+data(ToothGrowth)
+
+#View the data
+str(ToothGrowth)
+
+head(ToothGrowth)
+
+#Basic Analyses using Boxplots
+plot <- ggplot(ToothGrowth, aes(x=factor(dose), y=len, fill=factor(dose))) + 
+  geom_boxplot(notch=F) + facet_grid(.~supp) +
+  scale_x_discrete("Dosage (in mg)") +   
+  scale_y_continuous("Tooth Length") +  
+  ggtitle("Supplement and Dosage Effects on Tooth Growth")
+```
+
+On the plot below, we can observe the effects of Vitamin C on the Tooth Growth of Guinea pigs. The dosage levels are 0.5, 1 and 2, while the delivery methods of vitamin C are Orange juice and Absorbic acid.
+
+```{r, echo=FALSE}
+plot
+```
+
+
+
+##Provide a basic summary of the data
+
+Here, we have a summary of the ToothGrowth dataset, as well as a matrix for easy comparison between the dosage and the supplement.
+
+```{r}
+summary(ToothGrowth)
+
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+table(ToothGrowth$supp, ToothGrowth$dose)
+```
+
+
+##Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose
+
+We will now perform T-tests to see if there is a significant difference in tooth growth either by supplement type or by dosage variation.
+
+```{r}
+#Run a general T-test based on the type of supplement
+t.test(len~supp, data=ToothGrowth)
+```
+This result (p-value=0.06 > 0.05) suggests that there is not much difference on tooth growth that is associated with the delivery method of Vitamin C.
+However, we should take a closer look:
+
+```{r}
+#Run T-tests based specifically on each of the levels of dosage (0.5, 1, 2)
+t.test(len~supp, data = subset(ToothGrowth, dose == 0.5))
+t.test(len~supp, data = subset(ToothGrowth, dose == 1.0))
+t.test(len~supp, data = subset(ToothGrowth, dose == 2.0))
+
+```
+
+The results from the individual T-tests that are based on specific dosage levels, suggest that  when it comes to lower dosages (dose of 0.5 mg and 1.0 mg) there is a significant difference on the tooth growth of guinea pigs that depends on the delivery method.
+But for the larger dose (2.0 mg) the difference seems insignificant.
+
+
+##State your conclusions and the assumptions needed for your conclusions
+
+Gereral Assumptions to perform the tests above:
+1. The sample of guinea pigs used is repesentative of their population 
+2. There was random assignment of dosage and supplement on the guinea pigs
+
+General Conclusions of the Analyses:
+1. When the dosages are lower (0.5 mg & 1.0 mg), orange juice leads to more tooth growth than ascorbic acid.
+2. When the dosage is higher (2.0 mg), the tooth growth is not statistically different between the two supplement delivery methods.
+3. If we let aside the delivery method of the supplement, dosage is the factor that plays a key role in the tooth growth of guinea pigs.
+
